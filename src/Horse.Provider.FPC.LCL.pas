@@ -234,6 +234,7 @@ begin
     FServer.Active := False;
     FreeAndNil(FServer);
   end;
+  inherited Destroy;
 end;
 
 procedure THTTPServerThread.StartServer;
