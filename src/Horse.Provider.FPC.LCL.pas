@@ -11,6 +11,7 @@ uses
   SysUtils,
   Classes,
   httpdefs,
+  ssockets,
   fpHTTP,
   fphttpapp,
   Horse.Provider.Abstract,
@@ -146,7 +147,16 @@ class procedure THorseProvider.InternalStopListen;
 begin
   if not HTTPServerThreadIsNil then
   begin
-    GetDefaultHTTPServerThread.StopServer;
+	FHTTPServerThread.Terminate;
+    FHTTPServerThread.StopServer;
+	try
+	  // fake connection to unblock the server
+      TInetSocket.Create('localhost', FPort).Free;
+    except
+      // Ignore errors this may raise.
+    end;
+	FHTTPServerThread.WaitFor;
+	FreeAndNil(FHTTPServerThread);
     FRunning := False;
     DoOnStopListen;
   end
